@@ -31,3 +31,8 @@ export function sentence(text: string, offset: number) {
         return { index: -1, length: 0, text: "" };
     }
 }
+
+export function print(obj:any) {
+    console.log(obj);
+    return obj;
+}

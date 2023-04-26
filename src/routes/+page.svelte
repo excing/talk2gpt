@@ -7,6 +7,7 @@
 		speechRecognition,
 		initSpeechVoices
 	} from '$lib/audio';
+	import Billing from './Billing.svelte';
 
 	var prefixPrompt = new ChatMessage(
 		'system',
@@ -16,6 +17,8 @@
 	var requestBody = new ChatRequestBody([prefixPrompt], 200, 0.5, true);
 	var speechUtteranceText = '';
 	var errMessage: any = '';
+
+	var isShowUserBilling = false;
 
 	function start() {
 		new Audio('speech_start.mp3').play();
@@ -83,6 +86,9 @@
 	function textToSpeechError(err: any) {
 		console.log(err);
 	}
+	function showUserBilling() {
+		isShowUserBilling = !isShowUserBilling;
+	}
 
 	onMount(() => {
 		initSpeechVoices();
@@ -92,6 +98,12 @@
 <noscript><strong>请启用 JavaScript，否则页面无法正常工作。</strong></noscript>
 <h1>Test</h1>
 <button on:click={start}>开始对话</button>
+{#if isShowUserBilling}
+	<Billing />
+{:else}
+	<button
+		on:click={showUserBilling}>显示账户使用量</button>
+{/if}
 <p>{errMessage}</p>
 <div>
 	{#each requestBody.messages as msg}
