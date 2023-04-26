@@ -46,7 +46,7 @@
 		requestBody.messages[requestBody.messages.length] = new ChatMessage('assistant', '');
 	}
 	function speechRecognitionError(err: any) {
-		errMessage = err;
+		errMessage = JSON.stringify(err);
 	}
 	function chatDelta(text: string) {
 		console.log(text);
@@ -84,7 +84,7 @@
 		}
 	}
 	function textToSpeechError(err: any) {
-		console.log(err);
+		errMessage = JSON.stringify(err);
 	}
 	function showUserBilling() {
 		isShowUserBilling = !isShowUserBilling;
@@ -101,8 +101,7 @@
 {#if isShowUserBilling}
 	<Billing />
 {:else}
-	<button
-		on:click={showUserBilling}>显示账户使用量</button>
+	<button on:click={showUserBilling}>显示账户使用量</button>
 {/if}
 <p>{errMessage}</p>
 <div>
