@@ -1,4 +1,5 @@
 import { franc } from 'franc';
+import { transcriptions } from './openai';
 
 var voices: SpeechSynthesisVoice[] = [];
 var waittingListSize = 0;
@@ -72,6 +73,8 @@ const langEq = (lang1: string, lang2: string) => {
     return langStr1 === langStr2;
 };
 
+// 此方法仅限 PC 端 Edge 浏览器使用。
+// 或手机端英文用户使用。
 export function speechRecognition(
     onStart: () => void,
     onDelta: (text: string) => void,
@@ -125,4 +128,75 @@ export function speechRecognition(
     };
 
     recognition.start();
+}
+
+export function whisper(
+    onStart: () => void,
+    onDelta: (text: string) => void,
+    onDone: (text: string) => void,
+    onError: (e: any) => void,
+) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function (stream) {
+            const audioContext = new AudioContext();
+            const source = audioContext.createMediaStreamSource(stream);
+            const destination = audioContext.createMediaStreamDestination();
+            source.connect(destination);
+            const mediaRecorder = new MediaRecorder(destination.stream);
+            let chunks: Blob[] = [];
+            mediaRecorder.start();
+            mediaRecorder.addEventListener('dataavailable', function (event) {
+                chunks.push(event.data);
+            });
+            mediaRecorder.addEventListener('stop', function () {
+                const audiofile = getRecordFile(chunks, mediaRecorder.mimeType)
+                transcriptions(audiofile, onDone, onError)
+            });
+            detectStopRecording(stream, 0.38, () => {
+                if (mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                stream.getTracks().forEach(track => track.stop());
+            })
+            onStart();
+        })
+        .catch(function (error) {
+            // error
+            onError(error)
+        });
+}
+
+function detectStopRecording(stream: MediaStream, maxThreshold: number, onStop: () => void) {
+    const audioContext = new AudioContext();
+    const sourceNode = audioContext.createMediaStreamSource(stream);
+    const analyzerNode = audioContext.createAnalyser();
+    analyzerNode.fftSize = 2048;
+    analyzerNode.smoothingTimeConstant = 0.8;
+    sourceNode.connect(analyzerNode);
+    const frequencyData = new Uint8Array(analyzerNode.frequencyBinCount);
+    var startTime: number = 0;
+    const check = () => {
+        analyzerNode.getByteFrequencyData(frequencyData);
+        const amplitude = Math.max(...frequencyData) / 255;
+        // console.log(`amplitude: ${amplitude}`);
+        if (amplitude >= maxThreshold) {
+            // console.log("speeching");
+            startTime = new Date().getTime();
+            requestAnimationFrame(check);
+        } else if (startTime && (new Date().getTime() - startTime) > 1000) {
+            onStop();
+        } else {
+            // console.log("no speech");
+            requestAnimationFrame(check);
+        }
+    };
+    requestAnimationFrame(check);
+}
+
+const getRecordFile = (chunks: Blob[], mimeType: string) => {
+    const dataType = mimeType.split(';')[0];
+    const fileType = dataType.split('/')[1];
+    const blob = new Blob(chunks, { type: dataType });
+    const name = `input.${fileType}`;
+    return new File([blob], name, { type: dataType });
 }

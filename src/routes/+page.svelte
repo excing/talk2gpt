@@ -5,6 +5,7 @@
 		textToSpeech,
 		cancelTextToSpeech,
 		speechRecognition,
+		whisper,
 		initSpeechVoices
 	} from '$lib/audio';
 	import Billing from './Billing.svelte';
@@ -22,7 +23,7 @@
 
 	function start() {
 		new Audio('speech_start.mp3').play();
-		speechRecognition(
+		whisper(
 			speechRecognitionStart,
 			speechRecognitionDelta,
 			speechRecognitionDone,
@@ -41,13 +42,16 @@
 	function speechRecognitionDone(text: string) {
 		new Audio('speech_stop.mp3').play();
 		requestBody.messages[requestBody.messages.length - 1] = new ChatMessage('user', text);
-		chat(requestBody, chatDelta, chatDone, chatError);
-		speechUtteranceText = '';
-		requestBody.messages[requestBody.messages.length] = new ChatMessage('assistant', '');
+		// chat(requestBody, chatDelta, chatDone, chatError);
+		// speechUtteranceText = '';
+		// requestBody.messages[requestBody.messages.length] = new ChatMessage('assistant', '');
 	}
 	function speechRecognitionError(event: any) {
 		// event: SpeechRecognitionErrorEvent
-		errMessage = `Speech recognition error detected: ${event.error}\nAdditional information: ${event.message}`;
+		errMessage = `Speech recognition error detected: ${event.error}`;
+		if (event.message) {
+			errMessage += `\nAdditional information: ${event.message}`;
+		}
 	}
 	function chatDelta(text: string) {
 		console.log(text);
@@ -86,7 +90,7 @@
 	}
 	function textToSpeechError(event: any) {
 		// event: SpeechSynthesisErrorEvent
-		errMessage = `An error has occurred with the speech synthesis: ${event.error}`
+		errMessage = `An error has occurred with the speech synthesis: ${event.error}`;
 	}
 	function showUserBilling() {
 		isShowUserBilling = !isShowUserBilling;

@@ -122,3 +122,22 @@ function completions(body: ChatRequestBody, onDelta: (text: string) => void, onD
             onError(e)
         });
 }
+
+export function transcriptions(file: File, onDone: (text: string) => void, onError: (err: Error) => void) {
+    const formData = new FormData();
+    formData.append("model", "whisper-1");
+    formData.append("file", file);
+    formData.append("response_format", "json");
+    fetch("/api/openai/asr", {
+        method: "POST",
+        body: formData,
+    }).then((resp) => {
+        return resp.json()
+    }).then((data) => {
+        if (data.error) {
+            throw new Error(`${data.error.code}: ${data.error.message}`)
+        }
+        // data.text
+        onDone(data.text);
+    }).catch(onError)
+}
