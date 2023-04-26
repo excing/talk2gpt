@@ -7,6 +7,11 @@ declare global {
 		// interface PageData {}
 		// interface Platform {}
 	}
+
+	interface Window {
+		SpeechRecognition: any;
+		webkitSpeechRecognition: any;
+	}
 }
 
-export {};
+export { };
