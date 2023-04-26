@@ -7,7 +7,7 @@
 
 	onMount(() => {
 		userAgent = navigator.userAgent;
-		isEdgeBrower = /Edg\/\d./i.test(userAgent);
+		isEdgeBrower = /Edg[a-zA-Z]?\/\d./i.test(userAgent);
 		isLoading = false;
 	});
 </script>
