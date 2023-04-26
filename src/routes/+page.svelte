@@ -133,6 +133,7 @@
 		</label>
 	{/if}
 	{#if isShowUserBilling}
+		<button on:click={showUserBilling}>更新账户使用量</button>
 		<Billing />
 	{:else}
 		<button on:click={showUserBilling}>显示账户使用量</button>
