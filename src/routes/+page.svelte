@@ -45,8 +45,9 @@
 		speechUtteranceText = '';
 		requestBody.messages[requestBody.messages.length] = new ChatMessage('assistant', '');
 	}
-	function speechRecognitionError(err: any) {
-		errMessage = JSON.stringify(err);
+	function speechRecognitionError(event: any) {
+		// event: SpeechRecognitionErrorEvent
+		errMessage = `Speech recognition error detected: ${event.error}\nAdditional information: ${event.message}`;
 	}
 	function chatDelta(text: string) {
 		console.log(text);
@@ -83,8 +84,9 @@
 			start();
 		}
 	}
-	function textToSpeechError(err: any) {
-		errMessage = JSON.stringify(err);
+	function textToSpeechError(event: any) {
+		// event: SpeechSynthesisErrorEvent
+		errMessage = `An error has occurred with the speech synthesis: ${event.error}`
 	}
 	function showUserBilling() {
 		isShowUserBilling = !isShowUserBilling;
@@ -103,7 +105,7 @@
 {:else}
 	<button on:click={showUserBilling}>显示账户使用量</button>
 {/if}
-<p>{errMessage}</p>
+<p style="color: red">{errMessage}</p>
 <div>
 	{#each requestBody.messages as msg}
 		<p style="white-space: pre-wrap; word-wrap: break-word">{msg.content}</p>
