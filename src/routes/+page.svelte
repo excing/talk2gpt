@@ -26,6 +26,8 @@
 	var isShowUserBilling = false;
 	var isWhisper = false;
 
+	var maxContextSize = 10; // 上下文最大大小，即会话最大长度。
+
 	$: asr = isWhisper ? whisper : speechRecognition;
 
 	function start() {
@@ -53,7 +55,11 @@
 		}
 		new Audio('speech_stop.mp3').play();
 		messages[messages.length - 1] = new ChatMessage('user', text);
-		requestBody.messages = [prefixPrompt, ...messages];
+		if (maxContextSize < messages.length) {
+			requestBody.messages = [prefixPrompt, ...messages.slice(-maxContextSize)];
+		} else {
+			requestBody.messages = [prefixPrompt, ...messages];
+		}
 		chat(requestBody, chatDelta, chatDone, chatError);
 		speechUtteranceText = '';
 		messages[messages.length] = new ChatMessage('assistant', '');
@@ -122,7 +128,7 @@
 	{:else}
 		<button on:click={start}>开始对话</button>
 		<label>
-			<input type="checkbox" bind:checked={isWhisper}/>
+			<input type="checkbox" bind:checked={isWhisper} />
 			Whisper
 		</label>
 	{/if}
