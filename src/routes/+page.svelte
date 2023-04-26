@@ -9,21 +9,26 @@
 		initSpeechVoices
 	} from '$lib/audio';
 	import Billing from './Billing.svelte';
+	import App from './App.svelte';
 
 	var prefixPrompt = new ChatMessage(
 		'system',
 		'你是一个友善且有趣的朋友。请每个回复尽可能的短，多使用成语，最多不超过80字。'
 	);
+	var endPrompt = '我很满意你的服务';
 
-	var requestBody = new ChatRequestBody([prefixPrompt], 200, 0.5, true);
+	var messages: ChatMessage[] = [];
+	var requestBody = new ChatRequestBody([], 200, 0.8, true);
 	var speechUtteranceText = '';
 	var errMessage: any = '';
 
+	var chatStatus = 0; // 0: 未开始；1: 正在对话; 2: 准备结束对话.
 	var isShowUserBilling = false;
 
 	function start() {
+		chatStatus = 1;
 		new Audio('speech_start.mp3').play();
-		whisper(
+		speechRecognition(
 			speechRecognitionStart,
 			speechRecognitionDelta,
 			speechRecognitionDone,
@@ -34,17 +39,21 @@
 	function speechRecognitionStart() {
 		cancelChat();
 		cancelTextToSpeech();
-		requestBody.messages[requestBody.messages.length] = new ChatMessage('user', '');
+		messages[messages.length] = new ChatMessage('user', '');
 	}
 	function speechRecognitionDelta(text: string) {
-		requestBody.messages[requestBody.messages.length - 1] = new ChatMessage('user', text);
+		messages[messages.length - 1] = new ChatMessage('user', text);
 	}
 	function speechRecognitionDone(text: string) {
+		if (-1 < text.indexOf(endPrompt)) {
+			chatStatus = 2;
+		}
 		new Audio('speech_stop.mp3').play();
-		requestBody.messages[requestBody.messages.length - 1] = new ChatMessage('user', text);
-		// chat(requestBody, chatDelta, chatDone, chatError);
-		// speechUtteranceText = '';
-		// requestBody.messages[requestBody.messages.length] = new ChatMessage('assistant', '');
+		messages[messages.length - 1] = new ChatMessage('user', text);
+		requestBody.messages = [prefixPrompt, ...messages];
+		chat(requestBody, chatDelta, chatDone, chatError);
+		speechUtteranceText = '';
+		messages[messages.length] = new ChatMessage('assistant', '');
 	}
 	function speechRecognitionError(event: any) {
 		// event: SpeechRecognitionErrorEvent
@@ -65,7 +74,7 @@
 		);
 	}
 	function chatDone(text: string) {
-		// requestBody.messages[requestBody.messages.length - 1] = new ChatMessage('assistant', text);
+		// messages[messages.length - 1] = new ChatMessage('assistant', text);
 		console.log('Chat Done >: ', text);
 	}
 	function chatError(err: any) {
@@ -73,19 +82,20 @@
 	}
 	function textToSpeechBoundary(e: SpeechSynthesisEvent) {
 		const { charIndex, charLength, utterance } = e;
-		requestBody.messages[requestBody.messages.length - 1] = new ChatMessage(
+		messages[messages.length - 1] = new ChatMessage(
 			'assistant',
 			speechUtteranceText + utterance.text.substring(0, charIndex + charLength)
 		);
 	}
 	function textToSpeechEnd(e: SpeechSynthesisEvent, isLast: boolean) {
 		speechUtteranceText += e.utterance.text;
-		requestBody.messages[requestBody.messages.length - 1] = new ChatMessage(
-			'assistant',
-			speechUtteranceText
-		);
+		messages[messages.length - 1] = new ChatMessage('assistant', speechUtteranceText);
 		if (isLast) {
-			start();
+			if (chatStatus === 2) {
+				chatStatus = 0;
+			} else {
+				start();
+			}
 		}
 	}
 	function textToSpeechError(event: any) {
@@ -102,16 +112,22 @@
 </script>
 
 <noscript><strong>请启用 JavaScript，否则页面无法正常工作。</strong></noscript>
-<h1>Test</h1>
-<button on:click={start}>开始对话</button>
-{#if isShowUserBilling}
-	<Billing />
-{:else}
-	<button on:click={showUserBilling}>显示账户使用量</button>
-{/if}
-<p style="color: red">{errMessage}</p>
-<div>
-	{#each requestBody.messages as msg}
-		<p style="white-space: pre-wrap; word-wrap: break-word">{msg.content}</p>
-	{/each}
-</div>
+<App>
+	<h1>Test</h1>
+	{#if chatStatus === 1}
+		<div>当你说“<strong>{endPrompt}</strong>”时，结束对话。</div>
+	{:else}
+		<button on:click={start}>开始对话</button>
+	{/if}
+	{#if isShowUserBilling}
+		<Billing />
+	{:else}
+		<button on:click={showUserBilling}>显示账户使用量</button>
+	{/if}
+	<p style="color: red">{errMessage}</p>
+	<div>
+		{#each messages as msg}
+			<p style="white-space: pre-wrap; word-wrap: break-word">{msg.content}</p>
+		{/each}
+	</div>
+</App>
