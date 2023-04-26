@@ -3,9 +3,11 @@
 
 	var isLoading = true;
 	var isEdgeBrower = false;
+	var userAgent = '';
 
 	onMount(() => {
-		isEdgeBrower = /Edg\/\d./i.test(navigator.userAgent);
+		userAgent = navigator.userAgent;
+		isEdgeBrower = /Edg\/\d./i.test(userAgent);
 		isLoading = false;
 	});
 </script>
@@ -15,6 +17,7 @@
 {:else if isEdgeBrower}
 	<slot />
 {:else}
+	<span>{userAgent}</span>
 	<h1>
 		请使用 Microsoft Edge 浏览器打开本网站，或进入<a href="https://www.microsoft.com/edge"
 			>Microsoft Edge 官方网站</a

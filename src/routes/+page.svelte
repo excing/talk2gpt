@@ -24,11 +24,14 @@
 
 	var chatStatus = 0; // 0: 未开始；1: 正在对话; 2: 准备结束对话.
 	var isShowUserBilling = false;
+	var isWhisper = false;
+
+	$: asr = isWhisper ? whisper : speechRecognition;
 
 	function start() {
 		chatStatus = 1;
 		new Audio('speech_start.mp3').play();
-		speechRecognition(
+		asr(
 			speechRecognitionStart,
 			speechRecognitionDelta,
 			speechRecognitionDone,
@@ -118,6 +121,10 @@
 		<div>当你说“<strong>{endPrompt}</strong>”时，结束对话。</div>
 	{:else}
 		<button on:click={start}>开始对话</button>
+		<label>
+			<input type="checkbox" bind:checked={isWhisper}/>
+			Whisper
+		</label>
 	{/if}
 	{#if isShowUserBilling}
 		<Billing />
