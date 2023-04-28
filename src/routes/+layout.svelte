@@ -5,6 +5,11 @@
 	var isEdgeBrower = false;
 	var userAgent = '';
 
+	import Navbar from './Navbar.svelte';
+	import Sidebar from './Sidebar.svelte';
+
+	let open = false;
+
 	onMount(() => {
 		userAgent = navigator.userAgent;
 		isEdgeBrower = /Edg[a-zA-Z]?\/\d./i.test(userAgent);
@@ -15,11 +20,9 @@
 {#if isLoading}
 	<div class="loader wh-80px" />
 {:else if isEdgeBrower}
-	<div class="container">
-		<div class="content">
-			<slot />
-		</div>
-	</div>
+	<Sidebar bind:open />
+	<Navbar bind:sidebar={open} />
+	<slot />
 {:else}
 	<span>{userAgent}</span>
 	<h1>
@@ -29,13 +32,15 @@
 	</h1>
 {/if}
 
+<svelte:head>
+	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet" />
+</svelte:head>
+
 <style>
-	.container {
-		display: flex;
+	:global(body) {
+		padding: 0;
 	}
-	.content {
-		flex: 1;
-	}
+
 	.wh-80px {
 		width: 80px;
 		height: 80px;

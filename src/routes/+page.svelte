@@ -121,7 +121,6 @@
 </script>
 
 <noscript><strong>请启用 JavaScript，否则页面无法正常工作。</strong></noscript>
-<h1>与 ChatGPT 对话</h1>
 {#if chatStatus === 1}
 	<div>当你说“<strong>{endPrompt}</strong>”时，结束对话。</div>
 {:else}
