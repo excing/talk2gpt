@@ -12,6 +12,7 @@
 	});
 </script>
 
+<noscript><strong>请启用 JavaScript，否则页面无法正常工作。</strong></noscript>
 {#if isLoading}
 	<div class="loader wh-80px" />
 {:else if isEdgeBrower}
