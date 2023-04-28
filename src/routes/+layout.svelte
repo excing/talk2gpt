@@ -5,11 +5,6 @@
 	var isEdgeBrower = false;
 	var userAgent = '';
 
-	import Navbar from './Navbar.svelte';
-	import Sidebar from './Sidebar.svelte';
-
-	let open = false;
-
 	onMount(() => {
 		userAgent = navigator.userAgent;
 		isEdgeBrower = /Edg[a-zA-Z]?\/\d./i.test(userAgent);
@@ -20,21 +15,15 @@
 {#if isLoading}
 	<div class="loader wh-80px" />
 {:else if isEdgeBrower}
-	<Sidebar bind:open />
-	<Navbar bind:sidebar={open} />
 	<slot />
 {:else}
-	<span>{userAgent}</span>
+	<p>{userAgent}</p>
 	<h1>
 		请使用 Microsoft Edge 浏览器打开本网站，或进入<a href="https://www.microsoft.com/edge"
 			>Microsoft Edge 官方网站</a
 		>下载安装。
 	</h1>
 {/if}
-
-<svelte:head>
-	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet" />
-</svelte:head>
 
 <style>
 	:global(body) {
