@@ -15,7 +15,11 @@
 {#if isLoading}
 	<div class="loader wh-80px" />
 {:else if isEdgeBrower}
-	<slot />
+	<div class="container">
+		<div class="content">
+			<slot />
+		</div>
+	</div>
 {:else}
 	<span>{userAgent}</span>
 	<h1>
@@ -26,6 +30,12 @@
 {/if}
 
 <style>
+	.container {
+		display: flex;
+	}
+	.content {
+		flex: 1;
+	}
 	.wh-80px {
 		width: 80px;
 		height: 80px;

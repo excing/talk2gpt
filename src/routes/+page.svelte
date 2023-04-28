@@ -9,7 +9,7 @@
 		initSpeechVoices
 	} from '$lib/audio';
 	import Billing from './Billing.svelte';
-	import App from './App.svelte';
+	// import App from './+layout.svelte';
 
 	var prefixPrompt = new ChatMessage(
 		'system',
@@ -121,27 +121,25 @@
 </script>
 
 <noscript><strong>请启用 JavaScript，否则页面无法正常工作。</strong></noscript>
-<App>
-	<h1>Test</h1>
-	{#if chatStatus === 1}
-		<div>当你说“<strong>{endPrompt}</strong>”时，结束对话。</div>
-	{:else}
-		<button on:click={start}>开始对话</button>
-		<label>
-			<input type="checkbox" bind:checked={isWhisper} />
-			Whisper
-		</label>
-	{/if}
-	{#if isShowUserBilling}
-		<button on:click={showUserBilling}>更新账户使用量</button>
-		<Billing />
-	{:else}
-		<button on:click={showUserBilling}>显示账户使用量</button>
-	{/if}
-	<p style="color: red">{errMessage}</p>
-	<div>
-		{#each messages as msg}
-			<p style="white-space: pre-wrap; word-wrap: break-word">{msg.content}</p>
-		{/each}
-	</div>
-</App>
+<h1>与 ChatGPT 对话</h1>
+{#if chatStatus === 1}
+	<div>当你说“<strong>{endPrompt}</strong>”时，结束对话。</div>
+{:else}
+	<button on:click={start}>开始对话</button>
+	<label>
+		<input type="checkbox" bind:checked={isWhisper} />
+		Whisper
+	</label>
+{/if}
+{#if isShowUserBilling}
+	<button on:click={showUserBilling}>更新账户使用量</button>
+	<Billing />
+{:else}
+	<button on:click={showUserBilling}>显示账户使用量</button>
+{/if}
+<p style="color: red">{errMessage}</p>
+<div>
+	{#each messages as msg}
+		<p style="white-space: pre-wrap; word-wrap: break-word">{msg.content}</p>
+	{/each}
+</div>
