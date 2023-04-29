@@ -193,7 +193,7 @@ function detectStopRecording(stream: MediaStream, maxThreshold: number, onStop: 
     requestAnimationFrame(check);
 }
 
-const getRecordFile = (chunks: Blob[], mimeType: string) => {
+export const getRecordFile = (chunks: Blob[], mimeType: string) => {
     const dataType = mimeType.split(';')[0];
     const fileType = dataType.split('/')[1];
     const blob = new Blob(chunks, { type: dataType });

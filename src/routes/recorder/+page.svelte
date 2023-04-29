@@ -1,0 +1,58 @@
+<script lang="ts">
+	import { getRecordFile, initSpeechVoices, textToSpeech } from '$lib/audio';
+	import { onMount } from 'svelte';
+
+	let playText = '';
+    // tts 播放的声音无法清晰有效的录制，此方法无效。
+	async function handleRecord() {
+		const screenStream = await navigator.mediaDevices.getDisplayMedia({
+			audio: false,
+			video: true
+		});
+		const cameraStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+		const mixedStream = new MediaStream([
+			...cameraStream.getAudioTracks(),
+			...screenStream.getVideoTracks()
+		]);
+		const recorder = new MediaRecorder(mixedStream);
+		const chunks: Blob[] = [];
+
+		recorder.ondataavailable = (e) => chunks.push(e.data);
+		recorder.onstop = () => {
+			const file = getRecordFile(chunks, recorder.mimeType);
+			const url = URL.createObjectURL(file);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = file.name;
+			link.click();
+		};
+
+		recorder.start();
+		textToSpeech(
+			`因为你是我生命中的所有
+将我的心放在你手中
+陪你到永久
+迎着风
+迎向远方的天空
+路上也有艰难也有那解脱都走的从容`,
+			{ rate: 1.0, pitch: 3.0, volume: 1.0 },
+			(e: any) => {
+				const { charIndex, charLength, utterance } = e;
+				playText = utterance.text.substring(0, charIndex + charLength);
+			},
+			() => {
+				setTimeout(() => {
+					recorder.stop();
+				}, 2000);
+			},
+			() => {}
+		);
+	}
+
+	onMount(() => {
+		initSpeechVoices();
+	});
+</script>
+
+<button on:click={handleRecord}>开始录制</button>
+<div>{playText}</div>
