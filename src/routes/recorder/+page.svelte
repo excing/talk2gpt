@@ -3,18 +3,22 @@
 	import { onMount } from 'svelte';
 
 	let playText = '';
-    // tts 播放的声音无法清晰有效的录制，此方法无效。
+	// tts 播放的声音无法清晰有效的录制，此方法无效。
 	async function handleRecord() {
 		const screenStream = await navigator.mediaDevices.getDisplayMedia({
-			audio: false,
+			audio: true,
 			video: true
 		});
-		const cameraStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-		const mixedStream = new MediaStream([
-			...cameraStream.getAudioTracks(),
-			...screenStream.getVideoTracks()
-		]);
-		const recorder = new MediaRecorder(mixedStream);
+		const ssst = screenStream.getAudioTracks();
+		ssst.forEach((element) => {
+			console.log(element.label, element.kind);
+		});
+		// const cameraStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+		// const mixedStream = new MediaStream([
+		// 	...screenStream.getTracks(),
+		// 	...cameraStream.getAudioTracks()
+		// ]);
+		const recorder = new MediaRecorder(screenStream);
 		const chunks: Blob[] = [];
 
 		recorder.ondataavailable = (e) => chunks.push(e.data);
@@ -35,7 +39,7 @@
 迎着风
 迎向远方的天空
 路上也有艰难也有那解脱都走的从容`,
-			{ rate: 1.0, pitch: 3.0, volume: 1.0 },
+			{ rate: 1.0, pitch: 1.0, volume: 1.0 },
 			(e: any) => {
 				const { charIndex, charLength, utterance } = e;
 				playText = utterance.text.substring(0, charIndex + charLength);
