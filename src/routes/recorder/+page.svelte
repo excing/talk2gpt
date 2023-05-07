@@ -2,6 +2,7 @@
 	import { getRecordFile, initSpeechVoices, textToSpeech } from '$lib/audio';
 	import { onMount } from 'svelte';
 
+	let edittext = '';
 	let playText = '';
 	// tts 播放的声音无法清晰有效的录制，此方法无效。
 	async function handleRecord() {
@@ -32,13 +33,7 @@
 		};
 
 		recorder.start();
-		textToSpeech(
-			`因为你是我生命中的所有
-将我的心放在你手中
-陪你到永久
-迎着风
-迎向远方的天空
-路上也有艰难也有那解脱都走的从容`,
+		textToSpeech(edittext,
 			{ rate: 1.0, pitch: 1.0, volume: 1.0 },
 			(e: any) => {
 				const { charIndex, charLength, utterance } = e;
@@ -59,4 +54,5 @@
 </script>
 
 <button on:click={handleRecord}>开始录制</button>
+<textarea bind:value={edittext}/>
 <div>{playText}</div>
