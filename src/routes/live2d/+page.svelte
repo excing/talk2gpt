@@ -1,9 +1,13 @@
 <script lang="ts">
 	let canvas: any;
 
-	// const cubism2Model =
-	// 	'https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json';
-	const cubism2Model = '/yumi/yumi.model3.json';
+	const cubism2Model =
+		'https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json';
+	// const cubism2Model = '/yumi/yumi.model3.json';
+
+	let model: any;
+	let motionGroups: any[] = [];
+	let expressions: any[] = [];
 
 	async function start() {
 		const app = new PIXI.Application({
@@ -14,15 +18,25 @@
 			transparent: true
 		});
 
-		const model = await PIXI.live2d.Live2DModel.from(cubism2Model/*, { autoInteract: false }*/);
+		model = await PIXI.live2d.Live2DModel.from(cubism2Model, { autoInteract: false });
+
+		pixiModelLoaded(model);
+
+		app.stage.addChild(model);
+	}
+
+	function pixiModelLoaded(model: any) {
+		// 变换
+		// model.x = 100;
+		// model.y = 100;
+		model.scale.set(0.3, 0.3);
 
 		const motionManager = model.internalModel.motionManager;
-		const motionGroups: any[] = [];
 
 		const definitions = motionManager.definitions;
 
 		for (const [group, motions] of Object.entries(definitions)) {
-			motionGroups.push({
+			motionGroups[motionGroups.length] = {
 				name: group,
 				motions:
 					motions?.map((motion, index) => ({
@@ -30,33 +44,33 @@
 						error:
 							motionManager.motionGroups[group]![index]! === null ? 'Failed to load' : undefined
 					})) || []
-			});
+			};
 		}
+		motionSelect = motionGroups[0];
 
 		const expressionManager = motionManager.expressionManager;
-		const expressions =
+		expressions =
 			expressionManager?.definitions.map((expression, index) => ({
+				name: expression.name || expression.Name || '',
 				file: expression.file || expression.File || '',
 				error: expressionManager!.expressions[index]! === null ? 'Failed to load' : undefined
 			})) || [];
+		expressionSelect = expressions[0];
 
 		let motionState = motionManager.state;
 
-		console.log(motionGroups, expressions, motionState);
+		console.log('params: ', motionGroups, expressions, motionState);
+	}
 
-		app.stage.addChild(model);
+	let motionSelect: any;
+	let expressionSelect: any;
 
-		// 变换
-		// model.x = 100;
-		// model.y = 100;
-		model.scale.set(0.3, 0.3);
+	function onSelectMotion() {
+		model.motion(motionSelect.name);
+	}
 
-		// 交互
-		model.on('hit', (hitAreas) => {
-			if (hitAreas.includes('body')) {
-				model.motion('tap_body');
-			}
-		});
+	function onSelectExpression() {
+		model.expression(expressionSelect.name);
 	}
 </script>
 
@@ -67,5 +81,21 @@
 	<script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
 </svelte:head>
 
-<button on:click={start}>开始</button>
-<canvas bind:this={canvas} />
+<div style="display: flex;">
+	<div style="width: 200px;">
+		<button on:click={start}>开始</button>
+		<br />
+		<select bind:value={motionSelect} on:change={onSelectMotion}>
+			{#each motionGroups as mo}
+				<option value={mo}>{mo.name}</option>
+			{/each}
+		</select>
+		<br />
+		<select bind:value={expressionSelect} on:change={onSelectExpression}>
+			{#each expressions as ex}
+				<option value={ex}>{ex.file}</option>
+			{/each}
+		</select>
+	</div>
+	<canvas bind:this={canvas} style="flex: 1" />
+</div>
