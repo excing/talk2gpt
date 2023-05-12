@@ -1,13 +1,20 @@
 <script lang="ts">
+	import { streamPlayer } from '$lib/player';
+	import { speechSynthesis } from '$lib/synth';
+	import { onMount } from 'svelte';
+
 	let canvas: any;
 
-	const cubism2Model =
-		'https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/shizuku/shizuku.model.json';
+	const cubism2Model = '/shizuku/shizuku.model.json';
 	// const cubism2Model = '/yumi/yumi.model3.json';
 
 	let model: any;
 	let motionGroups: any[] = [];
 	let expressions: any[] = [];
+
+	let synth = speechSynthesis;
+	let voices: any[] = [];
+	let voice: any;
 
 	async function start() {
 		const app = new PIXI.Application({
@@ -75,10 +82,120 @@
 		model.expression(expressionSelect.name);
 	}
 
-	function mouthSync() {
-		let coreModel = model.internalModel.coreModel;
-		coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', parseFloat(Math.random().toFixed(1)));
+	function getVoices() {
+		voices = synth.getVoices();
 	}
+
+	function aloud() {
+		let text =
+			'Americans often try to say things as quickly as possible. So, for some expressions, we use the first letters of the words instead of saying each word. Many common expressions or long names are shortened this way.';
+		const utterance = new SpeechSynthesisUtterance(text);
+		utterance.lang = voice.Locale;
+		utterance.onstart = (e) => {
+			console.log('utterance.onstart', e);
+
+			if (e.currentTarget && e.currentTarget instanceof HTMLAudioElement)
+				mouthValueByAudio(e.currentTarget, (value) => {
+					console.log('mouth value: ', value);
+
+					let coreModel = model.internalModel.coreModel;
+					coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+				});
+		};
+		synth.speak(utterance, voice);
+	}
+
+	function speak() {
+		navigator.mediaDevices
+			.getUserMedia({ audio: true })
+			.then(function (stream) {
+				mouthSync(stream);
+			})
+			.catch(function (error) {
+				// error
+				console.error(error);
+			});
+	}
+
+	function mouthSync(stream: MediaStream) {
+		mouthValueByStream(stream, (value) => {
+			console.log('mouth value: ', value);
+
+			let coreModel = model.internalModel.coreModel;
+			coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+		});
+	}
+
+	function clamp(num: number, lower: number, upper: number) {
+		return num < lower ? lower : num > upper ? upper : num;
+	}
+
+	function _mouthValue(context: AudioContext, source: AudioNode, onasync: (value: number) => void) {
+		const analyser = context.createAnalyser();
+
+		analyser.fftSize = 256;
+		analyser.minDecibels = -90;
+		analyser.maxDecibels = -10;
+		analyser.smoothingTimeConstant = 0.85;
+
+		source.connect(analyser);
+		analyser.connect(context.destination);
+
+		const pcmData = new Float32Array(analyser.fftSize);
+		let lastValue = 0;
+		const check = () => {
+			let sumSquares = 0.0;
+			analyser.getFloatTimeDomainData(pcmData);
+			for (const amplitude of pcmData) {
+				sumSquares += amplitude * amplitude;
+			}
+			let value = f(sumSquares, pcmData.length);
+			let currValue = (value + lastValue) / 2.0;
+			if (value === lastValue) {
+				currValue = value;
+			}
+			lastValue = value;
+
+			onasync(currValue);
+			requestAnimationFrame(check);
+		};
+		requestAnimationFrame(check);
+	}
+
+	function mouthValueByAudio(audio: HTMLAudioElement, onasync: (value: number) => void) {
+		const context = new AudioContext();
+		const source = context.createMediaElementSource(audio);
+
+		_mouthValue(context, source, onasync);
+	}
+
+	function mouthValueByStream(stream: MediaStream, onasync: (value: number) => void) {
+		const context = new AudioContext();
+		const source = context.createMediaStreamSource(stream);
+
+		_mouthValue(context, source, onasync);
+	}
+
+	function f(sum: number, len: number) {
+		let value = parseFloat(Math.sqrt((sum / len) * 20).toFixed(2));
+		let min_ = 0;
+		let max_ = 2;
+		let weight = 1.8; // Fix small mouth when speaking
+
+		if (value > 0) {
+			min_ = 0.4; // Fix small mouth when speaking
+		}
+
+		value = clamp(value * weight, min_, max_); // must be between 0 (min) and 1 (max)
+		return value;
+	}
+
+	onMount(() => {
+		synth.onvoiceschanged = () => {
+			voices = synth.getVoices();
+			voice = voices[0];
+		};
+	});
 </script>
 
 <svelte:head>
@@ -92,7 +209,15 @@
 <div style="display: flex;">
 	<div style="width: 200px;">
 		<button on:click={start}>开始</button>
-		<button on:click={mouthSync}>说话</button>
+		<button on:click={aloud}>朗读</button>
+		<button on:click={getVoices}>说话人</button>
+		<button on:click={speak}>说话</button>
+		<br />
+		<select bind:value={voice}>
+			{#each voices as voice}
+				<option value={voice}>{voice.Name}</option>
+			{/each}
+		</select>
 		<br />
 		<select bind:value={motionSelect} on:change={onSelectMotion}>
 			{#each motionGroups as mo}

@@ -58,6 +58,10 @@ type SpeechSynthesisUtteranceExt = {
   metadatas: MSAudioMetadata[];
 }
 
+interface SpeechSynthesisEventInitExt extends SpeechSynthesisEventInit {
+  audio: HTMLAudioElement,
+}
+
 class SpeechSynthesis {
   private voices: MSVoice[] = [];
   private playUtteranceList: SpeechSynthesisUtteranceExt[] = [];
@@ -211,8 +215,8 @@ class SpeechSynthesis {
     this.connectSocket();
     this.sendAll();
     streamPlayer.connectAudioPlayer({
-      onTimeUpdate: (requestId, t) => {
-        let ts = t * 10000000;
+      onTimeUpdate: (requestId, audio) => {
+        let ts = audio.currentTime * 10000000;
         let { index, ext } = this.getPlayUtterance(requestId);
         let text = ext.utterance.text;
         let wordIndex = 0;
@@ -238,8 +242,23 @@ class SpeechSynthesis {
           }))
         }
       },
-      onBufferEnd: (requestId, t) => {
-        let ts = t * 10000000;
+      onBufferStart: (requestId, audio) => {
+        let { index, ext } = this.getPlayUtterance(requestId);
+        if (ext.utterance.onstart) {
+          let event: SpeechSynthesisEvent = {
+            type: 'start',
+            charIndex: 0,
+            charLength: 0,
+            elapsedTime: 0,
+            name: 'TextBoundary',
+            utterance: ext.utterance,
+            currentTarget: audio,
+          }
+          ext.utterance.onstart(event);
+        }
+      },
+      onBufferEnd: (requestId, audio) => {
+        let ts = audio.duration * 10000000;
         let { index, ext } = this.getPlayUtterance(requestId);
         if (ext.utterance.onend) {
           ext.utterance.onend(new SpeechSynthesisEvent('end', {

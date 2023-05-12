@@ -6,14 +6,15 @@ type MediaMeta = {
 }
 
 let mediaSource: MediaSource | null = null;
-let audio: any = null;
+let audio: HTMLAudioElement | null = null;
 // let bufferList: ArrayBuffer[] = []; // 缓冲区数组
 let metaList: MediaMeta[] = [];
 let isUpdateend = true; // 是否音频更新结束，正在等待
 
 async function connectAudioPlayer({
-    onTimeUpdate = (key: string, t: number) => { },
-    onBufferEnd = (key: string, t: number) => { },
+    onTimeUpdate = (key: string, audio: HTMLAudioElement) => { },
+    onBufferStart = (key: string, audio: HTMLAudioElement) => { },
+    onBufferEnd = (key: string, audio: HTMLAudioElement) => { },
 }) {
     if (!mediaSource) {
         let _mediaSource = new MediaSource();
@@ -68,7 +69,7 @@ async function connectAudioPlayer({
             let mediaMeta = metaList.shift();
             if (mediaMeta) {
                 // 通知播放结束.
-                onBufferEnd(mediaMeta.Key, _audio.duration);
+                onBufferEnd(mediaMeta.Key, _audio);
             }
             release();
             if (0 < metaList.length) {
@@ -76,11 +77,16 @@ async function connectAudioPlayer({
             }
         }
 
+        let isStart = false;
         let intervalId = setInterval(() => {
-            const currentTime = _audio.currentTime;
             let mediaMeta = metaList[0];
-            if (mediaMeta)
-                onTimeUpdate(mediaMeta.Key, currentTime);
+            if (mediaMeta) {
+                if (!isStart) {
+                    onBufferStart(mediaMeta.Key, _audio);
+                    isStart = true;
+                }
+                onTimeUpdate(mediaMeta.Key, _audio);
+            }
         }, 100);
 
         _audio.play();
