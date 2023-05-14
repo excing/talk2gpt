@@ -3,13 +3,14 @@
 	import { speechSynthesis } from '$lib/synth';
 	import { ChatMessage, ChatRequestBody, chat } from '$lib/openai';
 	import { KeepLiveWS } from 'bilibili-live-ws';
+	import { MouthSync } from '$lib/mouth';
 
 	// 设置语言
 	// 设置说话人
 	// 设置 TTS 引擎（本地或 MS EDGE，优先本地）
 	// 设置 ASR 引擎（本地或 whisper，优先本地）
 
-	let isStart = false;
+	let isStart = true;
 
 	const cubism2Model = '/shizuku/shizuku.model.json';
 
@@ -44,9 +45,28 @@
 
 	let roomId = 22044665;
 
+	let testText = '';
+	async function test() {
+		isStart = true;
+
+		if (!model) await displayLive2d();
+
+		let uname = 'excing';
+		let message = testText;
+		console.log('DANMU_MSG', uname, message);
+		waitRequestList[waitRequestList.length] = new ChatMessage('user', message);
+		setTimeout(speech, 10);
+	}
+
 	async function start() {
 		isStart = true;
 
+		await displayLive2d();
+
+		await bilibiliLive();
+	}
+
+	async function displayLive2d() {
 		const app = new PIXI.Application({
 			view: canvas,
 			autoStart: true,
@@ -61,8 +81,6 @@
 		model.scale.set(0.3, 0.3);
 
 		app.stage.addChild(model);
-
-		await bilibiliLive();
 	}
 
 	async function bilibiliLive() {
@@ -133,38 +151,17 @@
 		const utterance = new SpeechSynthesisUtterance(text);
 		utterance.lang = voice.Locale;
 
-		let fftSize = 256;
-		let analyser: any;
-		const pcmData = new Float32Array(fftSize);
+		let mouth = new MouthSync();
 		utterance.onstart = (e) => {
 			if (e.currentTarget && e.currentTarget instanceof HTMLAudioElement) {
-				const context = new AudioContext();
-				const source = context.createMediaElementSource(e.currentTarget);
-
-				analyser = context.createAnalyser();
-
-				analyser.fftSize = fftSize;
-				analyser.minDecibels = -90;
-				analyser.maxDecibels = -10;
-				analyser.smoothingTimeConstant = 0.85;
-
-				source.connect(analyser);
-				analyser.connect(context.destination);
+				mouth.mouthValueByAudio(e.currentTarget, (value) => {
+					let coreModel = model.internalModel.coreModel;
+					coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+				});
 			}
-		};
-		utterance.onboundary = (e) => {
-			if (!analyser) return;
-			let sumSquares = 0.0;
-			analyser.getFloatTimeDomainData(pcmData);
-			for (const amplitude of pcmData) {
-				sumSquares += amplitude * amplitude;
-			}
-			let value = f(sumSquares, pcmData.length);
-
-			let coreModel = model.internalModel.coreModel;
-			coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
 		};
 		utterance.onend = () => {
+			mouth.stop();
 			waitSentenceCount--;
 			setTimeout(speech, 10);
 		};
@@ -209,6 +206,11 @@
 		<div>
 			<input type="number" bind:value={roomId} />
 			<button on:click={start}>开始</button>
+		</div>
+	{:else}
+		<div>
+			<input type="text" bind:value={testText} />
+			<button on:click={test}>对话</button>
 		</div>
 	{/if}
 
