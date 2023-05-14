@@ -10,7 +10,7 @@
 	// 设置 TTS 引擎（本地或 MS EDGE，优先本地）
 	// 设置 ASR 引擎（本地或 whisper，优先本地）
 
-	let isStart = true;
+	let isStart = false;
 
 	const cubism2Model = '/shizuku/shizuku.model.json';
 
@@ -207,11 +207,11 @@
 			<input type="number" bind:value={roomId} />
 			<button on:click={start}>开始</button>
 		</div>
-	{:else}
+	<!-- {:else}
 		<div>
 			<input type="text" bind:value={testText} />
 			<button on:click={test}>对话</button>
-		</div>
+		</div> -->
 	{/if}
 
 	<div style="">
