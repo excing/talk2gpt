@@ -73,7 +73,7 @@ async function connectAudioPlayer({
             }
             release();
             if (0 < metaList.length) {
-                connectAudioPlayer({ onTimeUpdate, onBufferEnd });
+                connectAudioPlayer({ onTimeUpdate, onBufferStart, onBufferEnd });
             }
         }
 

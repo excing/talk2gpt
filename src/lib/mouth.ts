@@ -1,6 +1,7 @@
 export class MouthSync {
 
     private context: AudioContext | null = null;
+    private source: AudioNode | null = null;
     private analyser: AnalyserNode | null = null;
     private loop = false;
 
@@ -52,6 +53,7 @@ export class MouthSync {
         requestAnimationFrame(check);
 
         this.context = context;
+        this.source = source;
         this.analyser = analyser;
         this.loop = true;
     }
@@ -80,9 +82,14 @@ export class MouthSync {
             this.analyser.disconnect();
             this.analyser = null;
         }
+        if (this.source) {
+            this.source.disconnect();
+            this.source = null;
+        }
         if (this.context) {
-            this.context.close();
-            this.analyser = null;
+            if (this.context.state === 'running')
+                this.context.close();
+            this.context = null;
         }
     }
 }

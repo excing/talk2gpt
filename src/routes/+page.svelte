@@ -42,21 +42,9 @@
 
 	let waitRequestList: ChatMessage[] = [];
 	let waitSentenceCount = 0;
+	let speaking = false;
 
-	let roomId = 22044665;
-
-	let testText = '';
-	async function test() {
-		isStart = true;
-
-		if (!model) await displayLive2d();
-
-		let uname = 'excing';
-		let message = testText;
-		console.log('DANMU_MSG', uname, message);
-		waitRequestList[waitRequestList.length] = new ChatMessage('user', message);
-		setTimeout(speech, 10);
-	}
+	let roomId = 690; // 22044665;
 
 	async function start() {
 		isStart = true;
@@ -100,33 +88,35 @@
 
 		// 礼物
 		live.on('SEND_GIFT', ({ data: { uid, uname, action, giftName, num, face } }) => {
-			console.log('SEND_GIFT', uid, uname, action, giftName, num, face);
+			// console.log('SEND_GIFT', uid, uname, action, giftName, num, face);
 		});
 
 		// 弹幕
 		live.on('DANMU_MSG', ({ info: [, message, [uid, uname, isOwner /*, isVip, isSvip*/]] }) => {
-			console.log('DANMU_MSG', uid, uname, isOwner, message);
+			// console.log('DANMU_MSG', uid, uname, isOwner, message);
 			waitRequestList[waitRequestList.length] = new ChatMessage('user', message);
 			setTimeout(speech, 10);
 		});
 
 		// SC
 		live.on('SUPER_CHAT_MESSAGE', (fullData) => {
-			console.log('SUPER_CHAT_MESSAGE', fullData);
+			// console.log('SUPER_CHAT_MESSAGE', fullData);
 		});
 
 		live.on('SUPER_CHAT_MESSAGE_JPN', (data) => console.log('SUPER_CHAT_MESSAGE_JPN', data));
 
 		// 舰长
 		live.on('USER_TOAST_MSG', (fullData) => {
-			console.log('USER_TOAST_MSG', fullData);
+			// console.log('USER_TOAST_MSG', fullData);
 		});
 	}
 
 	function speech() {
-		if (waitSentenceCount === 0) {
+		console.log('utterance speech: ', speaking, waitSentenceCount);
+		if (!speaking && waitSentenceCount === 0) {
 			let msg = waitRequestList.shift();
 			if (msg) {
+				speaking = true;
 				requestBody.messages = [prefixPrompt, msg];
 				chat(requestBody, chatDelta, chatDone, chatError);
 			}
@@ -147,11 +137,11 @@
 		console.log(errMessage);
 	}
 
+	let mouth = new MouthSync();
 	function aloud(text: string) {
 		const utterance = new SpeechSynthesisUtterance(text);
 		utterance.lang = voice.Locale;
 
-		let mouth = new MouthSync();
 		utterance.onstart = (e) => {
 			if (e.currentTarget && e.currentTarget instanceof HTMLAudioElement) {
 				mouth.mouthValueByAudio(e.currentTarget, (value) => {
@@ -163,28 +153,13 @@
 		utterance.onend = () => {
 			mouth.stop();
 			waitSentenceCount--;
+			speaking = 0 < waitSentenceCount;
+			console.log('utterance end: ', speaking, waitSentenceCount);
+
 			setTimeout(speech, 10);
 		};
-		synth.speak(utterance, voice);
 		waitSentenceCount++;
-	}
-
-	function f(sum: number, len: number) {
-		let value = parseFloat(Math.sqrt((sum / len) * 20).toFixed(2));
-		let min_ = 0;
-		let max_ = 2;
-		let weight = 1.8; // Fix small mouth when speaking
-
-		if (value > 0) {
-			min_ = 0.4; // Fix small mouth when speaking
-		}
-
-		value = clamp(value * weight, min_, max_); // must be between 0 (min) and 1 (max)
-		return value;
-	}
-
-	function clamp(num: number, lower: number, upper: number) {
-		return num < lower ? lower : num > upper ? upper : num;
+		synth.speak(utterance, voice);
 	}
 
 	onMount(() => {});
@@ -207,11 +182,6 @@
 			<input type="number" bind:value={roomId} />
 			<button on:click={start}>开始</button>
 		</div>
-	<!-- {:else}
-		<div>
-			<input type="text" bind:value={testText} />
-			<button on:click={test}>对话</button>
-		</div> -->
 	{/if}
 
 	<div style="">
