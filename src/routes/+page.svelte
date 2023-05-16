@@ -59,8 +59,8 @@
 			view: canvas,
 			autoStart: true,
 			// resizeTo: window,
-			width: 400,
-			height: 500,
+			width: 550,
+			height: 550,
 			transparent: true
 		});
 
@@ -68,7 +68,7 @@
 
 		model = await PIXI.live2d.Live2DModel.from(cubism2Model, { autoInteract: false });
 
-		model.scale.set(0.3, 0.3);
+		model.scale.set(0.4, 0.4);
 
 		app.stage.addChild(model);
 	}
@@ -194,7 +194,7 @@
 <style>
 	:global(body) {
 		width: 100%;
-		height: 100%;
+		height: 100vh;
 		padding: 0;
 		margin: 0;
 		background-image: url('/bg.webp');
@@ -204,7 +204,10 @@
 	}
 
 	.container {
+		width: 100%;
+		height: 100%;
 		display: flex;
-		align-items: center;
+		align-items: end;
+		justify-content: center;
 	}
 </style>
