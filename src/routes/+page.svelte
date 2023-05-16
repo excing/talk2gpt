@@ -58,7 +58,9 @@
 		const app = new PIXI.Application({
 			view: canvas,
 			autoStart: true,
-			resizeTo: window,
+			// resizeTo: window,
+			width: 400,
+			height: 500,
 			transparent: true
 		});
 
@@ -176,7 +178,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js" async></script>
 </svelte:head>
 
-<div>
+<div class="container">
 	{#if !isStart}
 		<div>
 			<input type="number" bind:value={roomId} />
@@ -184,10 +186,25 @@
 		</div>
 	{/if}
 
-	<div style="">
+	<div>
 		<canvas bind:this={canvas} />
 	</div>
 </div>
 
 <style>
+	:global(body) {
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		margin: 0;
+		background-image: url('/bg.webp');
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-size: cover;
+	}
+
+	.container {
+		display: flex;
+		align-items: center;
+	}
 </style>
