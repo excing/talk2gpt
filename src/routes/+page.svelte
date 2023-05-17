@@ -17,6 +17,8 @@
 	let model: any;
 	let canvas: any;
 
+	let display = 'none';
+
 	let synth = speechSynthesis;
 	let voice: any = {
 		Name: 'Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)',
@@ -32,10 +34,9 @@
 		}
 	};
 
-	let prefixPrompt = new ChatMessage(
-		'system',
-		'你是一个友善且有趣的朋友。请每个回复尽可能的短，多使用成语，最多不超过80字。'
-	);
+	let prefixPromptText =
+		'你是一个友善且有趣的朋友。请每个回复尽可能的短，多使用成语，最多不超过80字。';
+	$: prefixPrompt = new ChatMessage('system', prefixPromptText);
 
 	let requestBody = new ChatRequestBody([], 200, 0.8, true);
 	let errMessage: any = '';
@@ -48,6 +49,8 @@
 
 	async function start() {
 		isStart = true;
+
+		display = 'flex';
 
 		await displayLive2d();
 
@@ -178,15 +181,24 @@
 	<script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js" async></script>
 </svelte:head>
 
-<div class="container">
+<div class="wh-100 center">
 	{#if !isStart}
 		<div>
-			<input type="number" bind:value={roomId} />
-			<button on:click={start}>开始</button>
+			<label>
+				Roomid:
+				<input type="number" bind:value={roomId} />
+			</label>
+			<label>
+				Prompt:
+				<textarea bind:value={prefixPromptText} />
+			</label>
+			<label>
+				<input type="submit" on:click={start} value="Start" />
+			</label>
 		</div>
 	{/if}
 
-	<div>
+	<div class="container wh-100" style:display>
 		<canvas bind:this={canvas} />
 	</div>
 </div>
@@ -203,11 +215,38 @@
 		background-size: cover;
 	}
 
-	.container {
+	.wh-100 {
 		width: 100%;
 		height: 100%;
-		display: flex;
+	}
+
+	.container {
 		align-items: end;
 		justify-content: center;
+	}
+
+	.center {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	label {
+		display: block;
+		color: aliceblue;
+	}
+
+	label + label {
+		margin-top: 20px;
+	}
+
+	input, textarea {
+		width: 240px;
+		padding: 10px;
+		font-size: 16px;
+	}
+
+	textarea {
+		height: 20vh;
 	}
 </style>
