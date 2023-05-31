@@ -129,13 +129,13 @@
 	}
 
 	function chatDelta(text: string) {
-		console.log(text);
+		// console.log(text);
 
 		aloud(text);
 	}
 	function chatDone(text: string) {
 		// messages[messages.length - 1] = new ChatMessage('assistant', text);
-		console.log('Chat Done >: ', text);
+		// console.log('Chat Done >: ', text);
 	}
 	function chatError(err: any) {
 		errMessage = err;
