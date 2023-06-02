@@ -73,6 +73,9 @@ const langEq = (lang1: string, lang2: string) => {
     return langStr1 === langStr2;
 };
 
+let speechStopStatus = 0;
+let speechRealResultTranscript: any;
+
 // 此方法仅限 PC 端 Edge 浏览器使用。
 // 或手机端英文用户使用。
 export function speechRecognition(
@@ -81,6 +84,10 @@ export function speechRecognition(
     onDone: (text: string) => void,
     onError: (e: any) => void,
 ) {
+    if (speechStopStatus !== 2) {
+        speechStopStatus = 1;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
 
@@ -98,7 +105,12 @@ export function speechRecognition(
 
             if (speechResult.isFinal) {
                 // final
-                onDone(speechResultTranscript);
+                // onDone(speechResultTranscript);
+
+                speechStopStatus = 2;
+                speechRealResultTranscript = speechResultTranscript;
+                speechRecognition(onStart, onDelta, onDone, onError);
+
             } else {
                 onDelta(speechResultTranscript);
             }
@@ -119,8 +131,13 @@ export function speechRecognition(
 
     recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
         if (e.error === 'no-speech') {
-            // Listen again
-            speechRecognition(onStart, onDelta, onDone, onError);
+            if (speechStopStatus === 2) {
+                speechStopStatus = 0;
+                onDone(speechRealResultTranscript);
+            } else {
+                // Listen again
+                speechRecognition(onStart, onDelta, onDone, onError);
+            }
         } else {
             // error
             onError(e)

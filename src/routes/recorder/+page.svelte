@@ -8,7 +8,9 @@
 	async function handleRecord() {
 		const screenStream = await navigator.mediaDevices.getDisplayMedia({
 			audio: true,
-			video: true
+			video: true,
+			selfBrowserSurface: 'include',
+			preferCurrentTab: true
 		});
 		const ssst = screenStream.getAudioTracks();
 		ssst.forEach((element) => {
@@ -33,7 +35,8 @@
 		};
 
 		recorder.start();
-		textToSpeech(edittext,
+		textToSpeech(
+			edittext,
 			{ rate: 1.0, pitch: 1.0, volume: 1.0 },
 			(e: any) => {
 				const { charIndex, charLength, utterance } = e;
@@ -54,5 +57,5 @@
 </script>
 
 <button on:click={handleRecord}>开始录制</button>
-<textarea bind:value={edittext}/>
+<textarea bind:value={edittext} />
 <div>{playText}</div>

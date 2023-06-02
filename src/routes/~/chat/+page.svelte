@@ -8,7 +8,10 @@
 
 	var displayMediaOptions: DisplayMediaStreamOptions = {
 		video: true,
-		audio: true
+		audio: true,
+		selfBrowserSurface: 'include',
+		preferCurrentTab: true,
+		systemAudio: 'include',
 	};
 
 	const cubism2Model = '/shizuku/shizuku.model.json';
@@ -51,14 +54,13 @@
 
 	let recorder: MediaRecorder | null = null;
 
-	function start() {
+	async function start() {
 		isDisplayCanvas = true;
 
-		displayLive2d();
-
-		handleRecord();
-
-		speech();
+		if (await displayLive2d()) {
+			handleRecord();
+			speech();
+		}
 	}
 
 	// https://stackoverflow.com/questions/64717758/merge-two-audio-tracks-into-one-track/65356064#65356064
@@ -161,15 +163,18 @@
 
 		try {
 			PIXI.live2d.config.sound = false;
+
+			model = await PIXI.live2d.Live2DModel.from(cubism2Model, { autoInteract: false });
 		} catch (error) {
 			errMessage = error;
+			return false;
 		}
-
-		model = await PIXI.live2d.Live2DModel.from(cubism2Model, { autoInteract: false });
 
 		model.scale.set(0.4, 0.4);
 
 		app.stage.addChild(model);
+
+		return true;
 	}
 
 	function chatDelta(text: string) {
