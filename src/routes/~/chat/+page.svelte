@@ -228,10 +228,14 @@
 
 <div class="wh-100">
 	<div class="container wh-100">
-		<button class="chat-button" style:display={isDisplayCanvas ? 'none' : 'black'} on:click={start}>
-			开始对话
-		</button>
-		<div>
+		<div style="display: flex; flex-direction: column;">
+			<button
+				class="chat-button"
+				style:display={isDisplayCanvas ? 'none' : 'black'}
+				on:click={start}
+			>
+				开始对话
+			</button>
 			<canvas bind:this={canvas} />
 			<p>{errMessage}</p>
 		</div>
@@ -262,7 +266,8 @@
 	}
 
 	.chat-button {
-		margin-bottom: 120px;
+		display: block;
+		margin-bottom: 60px;
 		padding: 5px 10px;
 	}
 </style>
