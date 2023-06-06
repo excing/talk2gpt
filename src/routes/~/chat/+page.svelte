@@ -67,7 +67,6 @@
 	beforeUpdate(() => {
 		if (chatsContainer) {
 			const scrollableDistance = chatsContainer.scrollHeight - chatsContainer.offsetHeight;
-			console.log(chatsContainer.scrollTop, scrollableDistance);
 			autoscroll = chatsContainer.scrollTop > scrollableDistance - 30;
 		}
 	});
@@ -167,7 +166,8 @@
 	}
 	function speechRecognitionDone(text: string) {
 		console.log('Speech Done >: ', text);
-		
+		chatDeltaMessage = new ChatMessage('user', text);
+
 		allMessageList[allMessageList.length] = new ChatMessage('user', text);
 		if (-1 < text.indexOf(endPrompt)) {
 			preEndSpeech = true;

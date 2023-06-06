@@ -114,7 +114,8 @@ function _speechRecognition(
         try {
             let speechResult = event.results[0];
             let speechResultTranscript = speechResult[0].transcript;
-            console.log(event);
+
+            onDelta(speechResultTranscript);
 
             if (speechResult.isFinal) {
                 // final
@@ -122,11 +123,8 @@ function _speechRecognition(
 
                 speechStopStatus = 2;
                 speechRealResultTranscript = last + speechResultTranscript;
-                
-                _speechRecognition(speechRealResultTranscript, onStart, onDelta, onDone, onError);
 
-            } else {
-                onDelta(speechResultTranscript);
+                _speechRecognition(speechRealResultTranscript, onStart, onDelta, onDone, onError);
             }
         } catch (e: any) {
             // error
