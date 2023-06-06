@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, beforeUpdate, afterUpdate } from 'svelte';
 	import { speechSynthesis } from '$lib/synth';
 	import { ChatMessage, ChatRequestBody, chat } from '$lib/openai';
 	import { MouthSync } from '$lib/mouth';
@@ -35,7 +35,7 @@
 		}
 	};
 
-	let prefixPromptText = 'you are a friendly assistant';
+	let prefixPromptText = '你是一个友善的助手，每个回复不得超过 80 个字';
 	let endPrompt = '我很满意你的服务';
 	let preEndSpeech = false;
 
@@ -60,6 +60,23 @@
 	$: asr = isWhisper ? whisper : speechRecognition;
 
 	let recorder: MediaRecorder | null = null;
+
+	let chatsContainer: any;
+	let autoscroll = false;
+
+	beforeUpdate(() => {
+		if (chatsContainer) {
+			const scrollableDistance = chatsContainer.scrollHeight - chatsContainer.offsetHeight;
+			console.log(chatsContainer.scrollTop, scrollableDistance);
+			autoscroll = chatsContainer.scrollTop > scrollableDistance - 30;
+		}
+	});
+
+	afterUpdate(() => {
+		if (autoscroll) {
+			chatsContainer.scrollTo(0, chatsContainer.scrollHeight);
+		}
+	});
 
 	async function start() {
 		isDisplayCanvas = true;
@@ -149,7 +166,9 @@
 		chatDeltaMessage = new ChatMessage('user', text);
 	}
 	function speechRecognitionDone(text: string) {
-		allMessageList.push(new ChatMessage('user', text));
+		console.log('Speech Done >: ', text);
+		
+		allMessageList[allMessageList.length] = new ChatMessage('user', text);
 		if (-1 < text.indexOf(endPrompt)) {
 			preEndSpeech = true;
 		}
@@ -210,7 +229,7 @@
 	function chatDone(text: string) {
 		console.log('Chat Done >: ', text);
 		usedGptTokenLen += encode(text).length;
-		allMessageList.push(new ChatMessage('assistant', text));
+		allMessageList[allMessageList.length] = new ChatMessage('assistant', text);
 	}
 	function chatError(err: any) {
 		errMessage = err;
@@ -282,7 +301,12 @@
 	</div>
 	{#if isDisplayCanvas}
 		<div class="chat-text">{chatDeltaMessage.content}</div>
-		<div class="used-tokens">{usedGptTokenLen} Tokens</div>
+		<!-- <div class="used-tokens">{usedGptTokenLen} Tokens</div> -->
+		<div class="chats" bind:this={chatsContainer}>
+			{#each allMessageList as msg}
+				<div class={msg.role}>{msg.content}</div>
+			{/each}
+		</div>
 	{/if}
 </div>
 
@@ -334,6 +358,44 @@
 		top: 30px;
 		right: 10px;
 		font-size: x-large;
-		color: rgb(32, 32, 32);
+		color: #39208a;
+	}
+
+	.chats {
+		position: absolute;
+		top: 30px;
+		left: 30px;
+		background: #5039208a;
+		box-sizing: border-box;
+		word-break: break-all;
+		word-wrap: break-word;
+		padding: 5px 0;
+		width: 260px;
+		height: 47vh;
+		max-width: 260px;
+		max-height: 47vh;
+		overflow: auto;
+	}
+
+	.chats .system,
+	.chats .user,
+	.chats .assistant {
+		padding: 4px 10px;
+	}
+
+	.chats .system {
+		color: red;
+	}
+	.chats .user {
+		color: wheat;
+	}
+	.chats .user::before {
+		content: '我：';
+	}
+	.chats .assistant {
+		color: aliceblue;
+	}
+	.chats .assistant::before {
+		content: 'AI：';
 	}
 </style>

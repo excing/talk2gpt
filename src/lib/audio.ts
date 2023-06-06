@@ -74,11 +74,23 @@ const langEq = (lang1: string, lang2: string) => {
 };
 
 let speechStopStatus = 0;
-let speechRealResultTranscript: any;
+let speechRealResultTranscript: string = '';
 
 // 此方法仅限 PC 端 Edge 浏览器使用。
 // 或手机端英文用户使用。
 export function speechRecognition(
+    onStart: () => void,
+    onDelta: (text: string) => void,
+    onDone: (text: string) => void,
+    onError: (e: any) => void,
+) {
+    speechStopStatus = 0;
+    speechRealResultTranscript = '';
+    _speechRecognition('', onStart, onDelta, onDone, onError);
+}
+
+function _speechRecognition(
+    last: string = '',
     onStart: () => void,
     onDelta: (text: string) => void,
     onDone: (text: string) => void,
@@ -102,14 +114,16 @@ export function speechRecognition(
         try {
             let speechResult = event.results[0];
             let speechResultTranscript = speechResult[0].transcript;
+            console.log(event);
 
             if (speechResult.isFinal) {
                 // final
                 // onDone(speechResultTranscript);
 
                 speechStopStatus = 2;
-                speechRealResultTranscript = speechResultTranscript;
-                speechRecognition(onStart, onDelta, onDone, onError);
+                speechRealResultTranscript = last + speechResultTranscript;
+                
+                _speechRecognition(speechRealResultTranscript, onStart, onDelta, onDone, onError);
 
             } else {
                 onDelta(speechResultTranscript);
@@ -126,7 +140,7 @@ export function speechRecognition(
 
     recognition.onnomatch = () => {
         // 没有匹配到
-        speechRecognition(onStart, onDelta, onDone, onError);
+        _speechRecognition(speechRealResultTranscript, onStart, onDelta, onDone, onError);
     };
 
     recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
@@ -136,7 +150,7 @@ export function speechRecognition(
                 onDone(speechRealResultTranscript);
             } else {
                 // Listen again
-                speechRecognition(onStart, onDelta, onDone, onError);
+                _speechRecognition(speechRealResultTranscript, onStart, onDelta, onDone, onError);
             }
         } else {
             // error
