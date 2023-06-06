@@ -35,21 +35,24 @@
 		}
 	};
 
-	let prefixPromptText = '你是一个友善的助手，每个回复最多不超过 120 个字。';
+	let prefixPromptText = 'you are a friendly assistant';
 	let endPrompt = '我很满意你的服务';
 	let preEndSpeech = false;
 
 	$: prefixPrompt = new ChatMessage('system', prefixPromptText);
 
+	let usedGptTokenLen = 0;
 	let maxGptTokenLen = 4000;
 	let maxChatTokenLen = 400;
-	$: usageTokenLen = maxGptTokenLen = maxChatTokenLen;
+	$: usableTokenLen = maxGptTokenLen = maxChatTokenLen;
 	let requestBody = new ChatRequestBody([], maxChatTokenLen, 0.8, true);
 	let errMessage: any = '';
 
 	let allMessageList: ChatMessage[] = [];
 	let waitSentenceCount = 0;
 	let speaking = false;
+
+	let chatDeltaMessage = new ChatMessage('system', '');
 
 	let isDisplayCanvas = false;
 
@@ -111,6 +114,10 @@
 				track.stop();
 				displayMedia.removeTrack(track);
 			});
+			userMedia.getTracks().forEach((track) => {
+				track.stop();
+				userMedia.removeTrack(track);
+			});
 
 			const file = getRecordFile(chunks, _recorder.mimeType);
 			const url = URL.createObjectURL(file);
@@ -139,6 +146,7 @@
 	}
 	function speechRecognitionDelta(text: string) {
 		// messages[messages.length - 1] = new ChatMessage('user', text);
+		chatDeltaMessage = new ChatMessage('user', text);
 	}
 	function speechRecognitionDone(text: string) {
 		allMessageList.push(new ChatMessage('user', text));
@@ -151,11 +159,12 @@
 			let msg = allMessageList[i];
 			// let tokenLen = encode(msg.content).length;
 			len += encode(msg.content).length;
-			if (usageTokenLen < len) {
+			if (usableTokenLen < len) {
 				break;
 			}
 			tempArr.unshift(msg);
 		}
+		usedGptTokenLen += len;
 		new Audio('/speech_stop.mp3').play();
 		requestBody.messages = [prefixPrompt, ...tempArr];
 		console.log(requestBody);
@@ -200,6 +209,7 @@
 	}
 	function chatDone(text: string) {
 		console.log('Chat Done >: ', text);
+		usedGptTokenLen += encode(text).length;
 		allMessageList.push(new ChatMessage('assistant', text));
 	}
 	function chatError(err: any) {
@@ -219,6 +229,13 @@
 					coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
 				});
 			}
+		};
+		utterance.onboundary = (e) => {
+			const { charIndex, charLength, utterance } = e;
+			chatDeltaMessage = new ChatMessage(
+				'assistant',
+				utterance.text.substring(0, charIndex + charLength)
+			);
 		};
 		utterance.onend = () => {
 			mouth.stop();
@@ -263,6 +280,10 @@
 			<p>{errMessage}</p>
 		</div>
 	</div>
+	{#if isDisplayCanvas}
+		<div class="chat-text">{chatDeltaMessage.content}</div>
+		<div class="used-tokens">{usedGptTokenLen} Tokens</div>
+	{/if}
 </div>
 
 <style>
@@ -292,5 +313,27 @@
 		display: block;
 		margin-bottom: 60px;
 		padding: 5px 10px;
+	}
+
+	.chat-text {
+		position: absolute;
+		bottom: 20px;
+		width: 100%;
+		background: #5039208a;
+		padding: 20px;
+		box-sizing: border-box;
+		font-size: xx-large;
+		color: aliceblue;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.used-tokens {
+		position: absolute;
+		top: 30px;
+		right: 10px;
+		font-size: x-large;
+		color: rgb(32, 32, 32);
 	}
 </style>
