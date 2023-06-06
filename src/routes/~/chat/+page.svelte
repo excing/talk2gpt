@@ -5,13 +5,14 @@
 	import { MouthSync } from '$lib/mouth';
 	import { speechRecognition, whisper } from '$lib/audio';
 	import { getRecordFile } from '$lib/audio';
+	import { encode } from '@beskar-labs/gpt-encoder';
 
 	var displayMediaOptions: DisplayMediaStreamOptions = {
 		video: true,
 		audio: true,
 		selfBrowserSurface: 'include',
 		preferCurrentTab: true,
-		systemAudio: 'include',
+		systemAudio: 'include'
 	};
 
 	const cubism2Model = '/shizuku/shizuku.model.json';
@@ -40,10 +41,13 @@
 
 	$: prefixPrompt = new ChatMessage('system', prefixPromptText);
 
-	let requestBody = new ChatRequestBody([], 400, 0.8, true);
+	let maxGptTokenLen = 4000;
+	let maxChatTokenLen = 400;
+	$: usageTokenLen = maxGptTokenLen = maxChatTokenLen;
+	let requestBody = new ChatRequestBody([], maxChatTokenLen, 0.8, true);
 	let errMessage: any = '';
 
-	let waitRequestList: ChatMessage[] = [];
+	let allMessageList: ChatMessage[] = [];
 	let waitSentenceCount = 0;
 	let speaking = false;
 
@@ -137,11 +141,25 @@
 		// messages[messages.length - 1] = new ChatMessage('user', text);
 	}
 	function speechRecognitionDone(text: string) {
+		allMessageList.push(new ChatMessage('user', text));
 		if (-1 < text.indexOf(endPrompt)) {
 			preEndSpeech = true;
 		}
+		let len = 0;
+		let tempArr = [];
+		for (let i = allMessageList.length - 1; 0 <= i; i--) {
+			let msg = allMessageList[i];
+			// let tokenLen = encode(msg.content).length;
+			len += encode(msg.content).length;
+			if (usageTokenLen < len) {
+				break;
+			}
+			tempArr.unshift(msg);
+		}
 		new Audio('/speech_stop.mp3').play();
-		requestBody.messages = [prefixPrompt, new ChatMessage('user', text)];
+		requestBody.messages = [prefixPrompt, ...tempArr];
+		console.log(requestBody);
+
 		chat(requestBody, chatDelta, chatDone, chatError);
 	}
 	function speechRecognitionError(event: any) {
@@ -181,8 +199,8 @@
 		aloud(text);
 	}
 	function chatDone(text: string) {
-		// messages[messages.length - 1] = new ChatMessage('assistant', text);
 		console.log('Chat Done >: ', text);
+		allMessageList.push(new ChatMessage('assistant', text));
 	}
 	function chatError(err: any) {
 		errMessage = err;
