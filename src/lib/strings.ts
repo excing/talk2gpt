@@ -2,11 +2,11 @@
 export function sentence(text: string, offset: number) {
     var substr = text.substring(offset)
     var newStr = substr;
-    console.log(text, offset, newStr);
+    // console.log(text, offset, newStr);
 
     const regex = /“(.+?)”/g;
     const chatSentences = newStr.match(regex) || [];
-    console.log(chatSentences);
+    // console.log(chatSentences);
 
     for (let index = 0; index < chatSentences.length; index++) {
         newStr = newStr.replace(chatSentences[index], `{$${index}}！`);
