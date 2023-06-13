@@ -107,7 +107,7 @@ function completions(body: ChatRequestBody, onDelta: (text: string) => void, onD
             // data
             let content: string = data.choices[0].message.content || ""
             let readOffset = 0;
-            for (let index = 0; index < content.length; index++) {
+            for (let index = 0; index <= content.length; index++) {
                 const element = content.substring(0, index)
                 let st = sentence(element, readOffset)
                 if (st.index !== -1) {

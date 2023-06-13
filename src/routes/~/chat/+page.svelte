@@ -43,7 +43,7 @@
 
 	let usedGptTokenLen = 0;
 	let maxGptTokenLen = 4000;
-	let maxChatTokenLen = 400;
+	let maxChatTokenLen = 2000;
 	$: usableTokenLen = maxGptTokenLen = maxChatTokenLen;
 	let requestBody = new ChatRequestBody([], maxChatTokenLen, 0.8, true);
 	let errMessage: any = '';
@@ -198,6 +198,15 @@
 		}
 	}
 
+	/*
+	  阅读下面的材料，根据要求写作。（60分）
+
+  人们因技术发展得以更好地掌控时间，但也有人因此成了时间的仆人。
+
+  这句话引发了你怎样的联想与思考？请写一篇文章。
+
+  要求：选准角度，确定立意，明确文体，自拟标题；不要套作，不得抄袭；不得泄露个人信息；不少于800字。
+	*/
 	async function displayLive2d() {
 		const app = new PIXI.Application({
 			view: canvas,
@@ -265,6 +274,7 @@
 			if (waitSentenceCount === 0) {
 				if (preEndSpeech) {
 					recorder?.stop();
+					isDisplayCanvas = false;
 				} else {
 					setTimeout(speech, 10);
 				}
