@@ -5,12 +5,12 @@
 
 	let canvas: any;
 
-	// const cubism2Model = '/miaojiu/喵玖.model3.json'; // coreModel.setParameterValueById('ParamMouthOpen', value, 0.8);
-	// const cubism2Model = '/mianfeimox/llny.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
-	// const cubism2Model = '/shizuku/shizuku.model.json'; // coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
-	// const cubism2Model = '/yumi/yumi.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
-	// const cubism2Model = '/mimosa_vts/av.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
-	const cubism2Model = '/ariu/ariu.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+	// const cubism2Model = '/miaojiu/喵玖.model3.json';
+	// const cubism2Model = '/mianfeimox/llny.model3.json';
+	// const cubism2Model = '/shizuku/shizuku.model.json';
+	// const cubism2Model = '/yumi/yumi.model3.json';
+	// const cubism2Model = '/mimosa_vts/av.model3.json';
+	const cubism2Model = '/ariu/ariu.model3.json';
 
 	let model: any;
 	let motionGroups: any[] = [];
