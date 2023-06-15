@@ -1,0 +1,25 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamHeartEye",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamRAD",
+            "Value": 0.5,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamBrowAngle",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamMouthShrug",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

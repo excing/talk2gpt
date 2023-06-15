@@ -81,7 +81,7 @@
 		isDisplayCanvas = true;
 
 		if (await displayLive2d()) {
-			handleRecord();
+			await handleRecord();
 			speech();
 		}
 	}
@@ -158,6 +158,8 @@
 		);
 	}
 	function speechRecognitionStart() {
+		console.log('Speech recognition start');
+		
 		// messages[messages.length] = new ChatMessage('user', '');
 	}
 	function speechRecognitionDelta(text: string) {
@@ -249,6 +251,7 @@
 	function aloud(text: string) {
 		const utterance = new SpeechSynthesisUtterance(text);
 		utterance.lang = voice.Locale;
+		utterance.rate = 1.1;
 
 		utterance.onstart = (e) => {
 			if (e.currentTarget && e.currentTarget instanceof HTMLAudioElement) {

@@ -1,0 +1,15 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamWink",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamMouthPressLipOpen",
+            "Value": 1.0,
+            "Blend": "Add"
+        }
+    ]
+}

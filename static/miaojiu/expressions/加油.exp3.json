@@ -1,0 +1,10 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "PARAM_HAND_SWITCH_R",
+            "Value": 2.0,
+            "Blend": "Add"
+        }
+    ]
+}

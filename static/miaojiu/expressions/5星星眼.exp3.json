@@ -1,0 +1,20 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamEyeEffect",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamWink",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamMouthShrug",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

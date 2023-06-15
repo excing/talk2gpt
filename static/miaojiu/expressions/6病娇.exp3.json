@@ -1,0 +1,25 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamEyeShine",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamEyeBallForm",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamShock",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamWink",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

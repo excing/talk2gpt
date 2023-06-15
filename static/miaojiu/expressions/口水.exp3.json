@@ -1,0 +1,15 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "PARAM_DROOL",
+            "Value": 2.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "CheekPuff",
+            "Value": 1.0,
+            "Blend": "Add"
+        }
+    ]
+}

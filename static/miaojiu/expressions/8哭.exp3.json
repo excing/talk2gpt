@@ -1,0 +1,25 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "ParamRAD",
+            "Value": 0.30000001192092898,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamWink",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamTears",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "CheekPuff",
+            "Value": 1.0,
+            "Blend": "Add"
+        }
+    ]
+}

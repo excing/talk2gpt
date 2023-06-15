@@ -1,0 +1,30 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "TongueOut3",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamRAD",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamBrowAngle",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "ParamMouthShrug",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "TongueOut2",
+            "Value": 1.0,
+            "Blend": "Add"
+        }
+    ]
+}

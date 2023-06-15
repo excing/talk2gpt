@@ -5,8 +5,10 @@
 
 	let canvas: any;
 
-	const cubism2Model = '/shizuku/shizuku.model.json';
-	// const cubism2Model = '/yumi/yumi.model3.json';
+	// const cubism2Model = '/miaojiu/喵玖.model3.json'; // coreModel.setParameterValueById('ParamMouthOpen', value, 0.8);
+	// const cubism2Model = '/mianfeimox/llny.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+	// const cubism2Model = '/shizuku/shizuku.model.json'; // coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+	const cubism2Model = '/yumi/yumi.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
 
 	let model: any;
 	let motionGroups: any[] = [];
@@ -14,7 +16,19 @@
 
 	let synth = speechSynthesis;
 	let voices: any[] = [];
-	let voice: any;
+	let voice: any = {
+		Name: 'Microsoft Server Speech Text to Speech Voice (zh-CN, XiaoxiaoNeural)',
+		ShortName: 'zh-CN-XiaoxiaoNeural',
+		Gender: 'Female',
+		Locale: 'zh-CN',
+		SuggestedCodec: 'audio-24khz-48kbitrate-mono-mp3',
+		FriendlyName: 'Microsoft Xiaoxiao Online (Natural) - Chinese (Mainland)',
+		Status: 'GA',
+		VoiceTag: {
+			ContentCategories: ['News', 'Novel'],
+			VoicePersonalities: ['Warm']
+		}
+	};
 
 	async function start() {
 		const app = new PIXI.Application({
@@ -99,7 +113,9 @@
 					console.log('mouth value: ', value);
 
 					let coreModel = model.internalModel.coreModel;
-					coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+					// coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+
+					coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
 				});
 		};
 		synth.speak(utterance, voice);
@@ -122,7 +138,9 @@
 			console.log('mouth value: ', value);
 
 			let coreModel = model.internalModel.coreModel;
-			coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+			// coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+
+			coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
 		});
 	}
 
@@ -201,7 +219,10 @@
 <svelte:head>
 	<title>Live2D simple</title>
 	<script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js" async></script>
-	<script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js" async></script>
+	<script
+		src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"
+		async
+	></script>
 	<script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js" async></script>
 	<script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js" async></script>
 </svelte:head>
