@@ -12,7 +12,9 @@
 		{
 			"Target": "Parameter",
 			"Name": "LipSync",
-			"Ids": []
+			"Ids": [
+				"ParamMouthOpen"
+			]
 		},
 		{
 			"Target": "Parameter",

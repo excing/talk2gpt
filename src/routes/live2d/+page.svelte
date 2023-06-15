@@ -8,7 +8,8 @@
 	// const cubism2Model = '/miaojiu/喵玖.model3.json'; // coreModel.setParameterValueById('ParamMouthOpen', value, 0.8);
 	// const cubism2Model = '/mianfeimox/llny.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
 	// const cubism2Model = '/shizuku/shizuku.model.json'; // coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
-	const cubism2Model = '/yumi/yumi.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+	// const cubism2Model = '/yumi/yumi.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+	const cubism2Model = '/mimosa_vts/av.model3.json'; // coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
 
 	let model: any;
 	let motionGroups: any[] = [];
@@ -35,8 +36,8 @@
 			view: canvas,
 			autoStart: true,
 			resizeTo: window,
-			// backgroundColor: 0x333333,
-			transparent: true
+			backgroundColor: 0x333333,
+			// transparent: true
 		});
 
 		PIXI.live2d.config.sound = false;
@@ -112,13 +113,23 @@
 				mouthValueByAudio(e.currentTarget, (value) => {
 					console.log('mouth value: ', value);
 
-					let coreModel = model.internalModel.coreModel;
-					// coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
-
-					coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+					mouthOpen(value);
 				});
 		};
 		synth.speak(utterance, voice);
+	}
+
+	function mouthOpen(value: number) {
+		let coreModel = model.internalModel.coreModel;
+
+		let lipSyncIds = model.internalModel.motionManager.lipSyncIds;
+		let perameterID = lipSyncIds ? lipSyncIds[0] : undefined;
+
+		if (perameterID) {
+			coreModel.setParameterValueById(perameterID, value, 0.8);
+		} else {
+			coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
+		}
 	}
 
 	function speak() {
@@ -137,10 +148,7 @@
 		mouthValueByStream(stream, (value) => {
 			console.log('mouth value: ', value);
 
-			let coreModel = model.internalModel.coreModel;
-			// coreModel.setParamFloat('PARAM_MOUTH_OPEN_Y', value);
-
-			coreModel.setParameterValueById('ParamMouthOpenY', value, 0.8);
+			mouthOpen(value);
 		});
 	}
 
