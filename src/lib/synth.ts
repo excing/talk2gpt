@@ -87,6 +87,8 @@ class SpeechSynthesis {
   readonly pending: boolean = false;
   readonly speaking: boolean = false;
 
+  private sendInterval: any | null = null;
+
   // 构造函数
   constructor() {
   }
@@ -112,10 +114,12 @@ class SpeechSynthesis {
 
     _socket.onclose = (event) => {
       console.log('WebSocket 连接已关闭');
+      clearInterval(this.sendInterval);
     };
 
     _socket.onerror = (event) => {
       console.error('WebSocket 连接出错：', event);
+      clearInterval(this.sendInterval);
     };
 
     this.socket = _socket;
@@ -139,6 +143,7 @@ class SpeechSynthesis {
       const header = buffer.slice(2, 46);
       const result = decoder.decode(header);
       const requestId = result.substring(12);
+      console.log('get ssml by id ->', requestId);
 
       streamPlayer.playBuffer(requestId, buffer);
     } else {
@@ -213,7 +218,7 @@ class SpeechSynthesis {
       metadatas: [],
     };
     this.connectSocket();
-    this.sendAll();
+    // this.sendAll();
     streamPlayer.connectAudioPlayer({
       onTimeUpdate: (requestId, audio) => {
         let ts = audio.currentTime * 10000000;
@@ -285,18 +290,19 @@ class SpeechSynthesis {
       this.playUtteranceList.push(ext);
 
       socket.send(request);
+
+      console.log('send ssml by id -> ', requestId, ': ', ext.utterance.text);
     }
   }
 
   private sendAll() {
-    let socket = this.socket;
-    let waitUtteranceList = this.waitUtteranceList;
-    if (socket && socket.readyState == WebSocket.OPEN) {
-      waitUtteranceList.forEach(element => {
-        this.send(element);
-      });
-      this.waitUtteranceList = [];
-    }
+    this.sendInterval = setInterval(() => {
+      let socket = this.socket;
+      if (socket && socket.readyState == WebSocket.OPEN) {
+        let element = this.waitUtteranceList.shift();
+        if (element) this.send(element);
+      }
+    }, 1000);
   }
 }
 
