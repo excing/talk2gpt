@@ -57,28 +57,36 @@ function completionsStream(body: ChatRequestBody, onDelta: (text: string) => voi
     });
 
     source.addEventListener('message', function (e: any) {
-        if (e.data == '[DONE]') {
-            // done
-            onDone(message);
-        } else {
-            try {
-                let data = JSON.parse(e.data);
-                if (data.error) {
-                    // error
-                    throw new Error(data.error);
-                } else {
-                    message += data.choices[0].delta.content || '';
-                    let st = sentence(message, readOffset);
+        // console.log(e.data);
+        /*
+                {"id":"chatcmpl-7RxuUDDBAhmswTLbEgbL2unh5FqTA","object":"chat.completion.chunk","created":1686899506,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{"content":"？"},"index":0,"finish_reason":null}]}
+                {"id":"chatcmpl-7RxuUDDBAhmswTLbEgbL2unh5FqTA","object":"chat.completion.chunk","created":1686899506,"model":"gpt-3.5-turbo-0301","choices":[{"delta":{},"index":0,"finish_reason":"stop"}]}
+        */
 
-                    if (st.index !== -1) {
-                        onDelta(st.text);
-                        readOffset = st.index + st.length;
-                    }
-                }
-            } catch (e) {
+        if (e.data === '[DONE]') {
+            // done
+            // onDone(message);
+            return;
+        }
+        try {
+            let data = JSON.parse(e.data);
+            if (data.error) {
                 // error
-                onError(e)
+                throw new Error(data.error);
+            } else if (data.choices[0].finish_reason === 'stop') {
+                onDone(message);
+            } else {
+                message += data.choices[0].delta.content || '';
+                let st = sentence(message, readOffset);
+
+                if (st.index !== -1) {
+                    onDelta(st.text);
+                    readOffset = st.index + st.length;
+                }
             }
+        } catch (e) {
+            // error
+            onError(e)
         }
     });
 
@@ -115,7 +123,7 @@ function completions(body: ChatRequestBody, onDelta: (text: string) => void, onD
                     readOffset = st.index + st.length;
                 }
             }
-            let st = sentence(content, readOffset)
+            // let st = sentence(content, readOffset)
             onDone(content)
         })
         .catch((e) => {
