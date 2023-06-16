@@ -194,10 +194,11 @@
 	}
 	function speechRecognitionError(event: any) {
 		// event: SpeechRecognitionErrorEvent
-		errMessage = `Speech recognition error detected: ${event.error}`;
+		let errMessage = `Speech recognition error detected: ${event.error}`;
 		if (event.message) {
 			errMessage += `\nAdditional information: ${event.message}`;
 		}
+		console.error(errMessage);		
 	}
 
 	/*
@@ -251,7 +252,7 @@
 	function aloud(text: string) {
 		const utterance = new SpeechSynthesisUtterance(text);
 		utterance.lang = voice.Locale;
-		utterance.rate = 1.1;
+		utterance.rate = 1.0;
 
 		utterance.onstart = (e) => {
 			if (e.currentTarget && e.currentTarget instanceof HTMLAudioElement) {
