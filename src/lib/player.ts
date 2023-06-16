@@ -21,9 +21,12 @@ async function connectAudioPlayer({
         let _audio = new Audio();
 
         _audio.src = URL.createObjectURL(_mediaSource);
+        _audio.playbackRate = 1.2;
 
         const onupdateend = (sourceBuffer: SourceBuffer) => {
             let mediaMeta = metaList[0];
+            console.log('=====>>> player onupdateend by key -> ', mediaMeta ? mediaMeta.Key : 'unknown');
+
             if (mediaMeta) {
                 let bufferList = mediaMeta.BufferList;
                 // 读取完毕后缓冲区有数据，从缓冲区读取
@@ -72,9 +75,7 @@ async function connectAudioPlayer({
                 onBufferEnd(mediaMeta.Key, _audio);
             }
             release();
-            if (0 < metaList.length) {
-                connectAudioPlayer({ onTimeUpdate, onBufferStart, onBufferEnd });
-            }
+            connectAudioPlayer({ onTimeUpdate, onBufferStart, onBufferEnd });
         }
 
         let isStart = false;
@@ -101,9 +102,10 @@ function playBuffer(key: string, buffer: ArrayBuffer) {
     let bufferList = value.BufferList;
     bufferList[bufferList.length] = buffer;
     if (isUpdateend && mediaSource) {
+        console.log('play buffer by key -> ', key);
 
         let _buffer = bufferList.shift();
-        if (_buffer) {
+        if (_buffer && mediaSource.sourceBuffers[0]) {
             mediaSource.sourceBuffers[0].appendBuffer(_buffer);
             isUpdateend = false;
         }
@@ -138,6 +140,8 @@ function getMediaMeta(key: string) {
 }
 
 function release() {
+    console.log('=====>>> player release');
+
     if (mediaSource) {
         const sourceBuffers = mediaSource.sourceBuffers;
         for (let index = 0; index < sourceBuffers.length; index++) {
