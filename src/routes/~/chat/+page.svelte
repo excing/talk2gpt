@@ -35,6 +35,8 @@
 		}
 	};
 
+	let bgm =
+		'https://ws.stream.qqmusic.qq.com/C4000048teta2vIMii.m4a?guid=4220211900&vkey=2D971EB1842A7E61E9EE9DC1951351A68A2BE155B81E1358F97D6D959CDD66BD96B1CDD364DF61DCF4A8F1FCB3C860AA9B7909A35E53E964&uin=&fromtag=123032';
 	let prefixPromptText = '你是一个友善的助手，每个回复不得超过 80 个字';
 	let endPrompt = '我很满意你的服务';
 	let preEndSpeech = false;
@@ -83,6 +85,11 @@
 		if (await displayLive2d()) {
 			await handleRecord();
 			speech();
+
+			let player = new Audio(bgm);
+			player.loop = true;
+			player.volume = 0.3;
+			player.play();
 		}
 	}
 
@@ -159,7 +166,7 @@
 	}
 	function speechRecognitionStart() {
 		console.log('Speech recognition start');
-		
+
 		// messages[messages.length] = new ChatMessage('user', '');
 	}
 	function speechRecognitionDelta(text: string) {
@@ -198,7 +205,7 @@
 		if (event.message) {
 			errMessage += `\nAdditional information: ${event.message}`;
 		}
-		console.error(errMessage);		
+		console.error(errMessage);
 	}
 
 	/*
@@ -302,13 +309,18 @@
 <div class="wh-100">
 	<div class="container wh-100">
 		<div style="display: flex; flex-direction: column;">
-			<button
-				class="chat-button"
+			<div
+				style="display: flex; flex-direction: column;"
 				style:display={isDisplayCanvas ? 'none' : 'black'}
-				on:click={start}
 			>
-				开始对话
-			</button>
+				<lable style="color: white;">背景:</lable>
+				<input bind:value={bgm} />
+				<br />
+				<lable style="color: white;">助手设置:</lable>
+				<textarea style="height: 100px;" bind:value={prefixPromptText} />
+				<br />
+				<button class="chat-button" on:click={start}> 开始对话 </button>
+			</div>
 			<canvas bind:this={canvas} />
 			<p>{errMessage}</p>
 		</div>

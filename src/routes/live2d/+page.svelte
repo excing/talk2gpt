@@ -10,7 +10,8 @@
 	// const cubism2Model = '/shizuku/shizuku.model.json';
 	// const cubism2Model = '/yumi/yumi.model3.json';
 	// const cubism2Model = '/mimosa_vts/av.model3.json';
-	const cubism2Model = '/ariu/ariu.model3.json';
+	// const cubism2Model = '/ariu/ariu.model3.json';
+	const cubism2Model = '/march7/三月七.model3.json';
 
 	let model: any;
 	let motionGroups: any[] = [];
