@@ -87,7 +87,6 @@
 			speech();
 
 			let player = new Audio(bgm);
-			player.loop = true;
 			player.volume = 0.3;
 			player.play();
 		}
